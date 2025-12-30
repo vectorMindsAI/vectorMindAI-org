@@ -124,8 +124,36 @@ export default function OnboardingPage() {
     }
   }
 
-  const handleSkip = () => {
-    router.push("/dashboard")
+  const handleSkip = async () => {
+    setLoading(true)
+
+    try {
+      // Create a default organization with user's name
+      const userName = session?.user?.name || "My"
+      const defaultOrgName = `${userName}'s Workspace`
+
+      const response = await fetch("/api/organization/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: defaultOrgName }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success("Default workspace created! You can join other organizations anytime.")
+        // Update session to reflect new role and organization
+        await update()
+        router.push("/dashboard")
+      } else {
+        toast.error(data.error || "Failed to create workspace")
+      }
+    } catch (error) {
+      console.error("Error creating default workspace:", error)
+      toast.error("Failed to create workspace")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (status === "loading") {
@@ -291,9 +319,12 @@ export default function OnboardingPage() {
         )}
 
         <div className="text-center mt-6">
-          <Button variant="ghost" onClick={handleSkip}>
-            Skip for now
+          <Button variant="ghost" onClick={handleSkip} disabled={loading}>
+            {loading ? "Creating workspace..." : "Skip for now"}
           </Button>
+          <p className="text-xs text-gray-500 mt-2">
+            A default workspace will be created. You can join other organizations later.
+          </p>
         </div>
       </div>
     </div>
