@@ -6,11 +6,12 @@ import { requireOrgAdmin } from "@/lib/auth-helpers"
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
     const session = await requireOrgAdmin()
     const { action } = await req.json() // "approve" or "reject"
+    const { requestId } = await params
 
     if (!action || !["approve", "reject"].includes(action)) {
       return NextResponse.json(
@@ -41,7 +42,7 @@ export async function PATCH(
 
     // Find the join request
     const requestIndex = organization.joinRequests?.findIndex(
-      (req: any) => req.userId === params.requestId && req.status === "pending"
+      (req: any) => req.userId === requestId && req.status === "pending"
     )
 
     if (requestIndex === -1 || requestIndex === undefined) {
