@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [tavilyKey, setTavilyKey] = useState("")
   const [selectedModel, setSelectedModel] = useState("groq/compound")
   const [selectedFallbackModel, setSelectedFallbackModel] = useState("llama-3.3-70b-versatile")
+  const [organizationName, setOrganizationName] = useState("")
   const [criteria, setCriteria] = useState<any[]>([
     { id: "1", name: "Average Temperature", description: "Annual average temperature in Celsius", outputSchema: [] },
   ])
@@ -60,6 +61,16 @@ export default function Dashboard() {
       const organizationId = (session.user as any)?.organizationId
       if (!organizationId) {
         router.push("/onboarding")
+      } else {
+        // Fetch organization name
+        fetch(`/api/organization/info`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.organization) {
+              setOrganizationName(data.organization.name)
+            }
+          })
+          .catch((err) => console.error("Error fetching organization:", err))
       }
     }
   }, [status, session, router])
@@ -291,7 +302,15 @@ export default function Dashboard() {
             </Button>
 
             <div className="flex-1 lg:flex-initial">
-              <h1 className="text-base lg:text-lg font-semibold text-foreground">AI City Research Agent</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base lg:text-lg font-semibold text-foreground">AI City Research Agent</h1>
+                {organizationName && (
+                  <>
+                    <span className="text-muted-foreground hidden sm:inline">•</span>
+                    <span className="text-sm text-muted-foreground hidden sm:inline">{organizationName}</span>
+                  </>
+                )}
+              </div>
               <p className="text-xs lg:text-sm text-muted-foreground hidden sm:block">Multi-Step Enrichment Engine</p>
             </div>
 
