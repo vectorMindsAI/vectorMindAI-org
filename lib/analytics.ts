@@ -7,6 +7,7 @@ export type AnalyticsEvent = {
     model: string
     criteriaCount: number
     userId?: string
+    organizationId?: string
   }
   'research_completed': {
     query: string
@@ -17,12 +18,14 @@ export type AnalyticsEvent = {
     outputLength?: number
     outputCharacters?: number
     userId?: string
+    organizationId?: string
   }
   'research_failed': {
     query: string
     model: string
     error: string
     userId?: string
+    organizationId?: string
   }
   'model_usage_tracked': {
     model: string
@@ -31,17 +34,20 @@ export type AnalyticsEvent = {
     duration: number
     tokensEstimate?: number
     userId?: string
+    organizationId?: string
   }
   'extended_research_started': {
     query: string
     selectedIds: number
     userId?: string
+    organizationId?: string
   }
   'extended_research_completed': {
     query: string
     duration: number
     enrichedCount: number
     userId?: string
+    organizationId?: string
   }
   
   // Model Usage Events

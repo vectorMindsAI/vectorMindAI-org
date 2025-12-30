@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowRight, Sparkles, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,20 +11,31 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/lib/toast"
 import { signIn } from "next-auth/react"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [callbackUrl, setCallbackUrl] = useState("/dashboard")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     agreeToTerms: false,
+    createOrganization: false,
+    organizationName: "",
   })
+
+  useEffect(() => {
+    const callback = searchParams.get("callbackUrl")
+    if (callback) {
+      setCallbackUrl(callback)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,11 +77,14 @@ export default function SignUpPage() {
       if (result?.error) {
         toast.error("Account created, but failed to sign in. Please try signing in manually.")
         router.push("/auth/signin")
-      } else {
-        toast.success("Account created successfully!")
-        router.push("/dashboard")
-        router.refresh()
+        setIsLoading(false)
+        return
       }
+
+      toast.success("Account created successfully!")
+      
+      // Redirect to the callback URL (could be dashboard or invite page)
+      router.push(callbackUrl)
     } catch (error) {
       toast.error("An error occurred. Please try again.")
       setIsLoading(false)
@@ -79,7 +93,8 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     try {
-      await signIn("google", { callbackUrl: "/dashboard" })
+      // Use the callback URL from query params
+      await signIn("google", { callbackUrl })
     } catch (error) {
       toast.error("Failed to sign up with Google")
     }
@@ -170,6 +185,37 @@ export default function SignUpPage() {
                     Privacy Policy
                   </Link>
                 </label>
+              </div>
+
+              <div className="border-t pt-4 space-y-3 hidden">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="createOrg"
+                    checked={formData.createOrganization}
+                    onCheckedChange={(checked) => setFormData({ ...formData, createOrganization: checked as boolean })}
+                  />
+                  <label htmlFor="createOrg" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">
+                    Create an organization (for teams)
+                  </label>
+                </div>
+
+                {formData.createOrganization && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="orgName">Organization Name</Label>
+                    <Input
+                      id="orgName"
+                      type="text"
+                      placeholder="My Company"
+                      value={formData.organizationName}
+                      onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
+                      required={formData.createOrganization}
+                      className="bg-background"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      You'll become the organization admin and can invite team members
+                    </p>
+                  </div>
+                )}
               </div>
 
               <Button type="submit" className="w-full gap-2" disabled={isLoading}>

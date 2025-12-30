@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowRight, Sparkles, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,18 +10,27 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/lib/toast"
 import { signIn } from "next-auth/react"
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [callbackUrl, setCallbackUrl] = useState("/dashboard")
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
+
+  useEffect(() => {
+    const callback = searchParams.get("callbackUrl")
+    if (callback) {
+      setCallbackUrl(callback)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +48,8 @@ export default function SignInPage() {
         setIsLoading(false)
       } else {
         toast.success("Signed in successfully!")
-        router.push("/dashboard")
+        // Redirect to callback URL (could be dashboard, invite page, etc.)
+        router.push(callbackUrl)
         router.refresh()
       }
     } catch (error) {
@@ -50,7 +60,7 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn("google", { callbackUrl: "/dashboard" })
+      await signIn("google", { callbackUrl })
     } catch (error) {
       toast.error("Failed to sign in with Google")
     }

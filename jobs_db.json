@@ -2742,5 +2742,51 @@
       }
     },
     "createdAt": 1766860852782
+  },
+  "e32dd9c2-cba6-49b9-ad40-3133f7a029bc": {
+    "id": "e32dd9c2-cba6-49b9-ad40-3133f7a029bc",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767122593188
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "details": "401 {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}",
+        "error": "Failed to process Average Temperature"
+      }
+    },
+    "createdAt": 1767122591504,
+    "userId": "6946f8bac4db5b75c7f99b00",
+    "organizationId": "695423d59d10cbb54511444f",
+    "userName": "Kumar Vanshaj",
+    "userEmail": "kumar.vanshaj2024@gmail.com"
+  },
+  "88105d09-926b-4f4c-a1b3-1a8bb5c792be": {
+    "id": "88105d09-926b-4f4c-a1b3-1a8bb5c792be",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767122998174
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "details": "401 {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}",
+        "error": "Failed to process Average Temperature"
+      }
+    },
+    "createdAt": 1767122996577,
+    "userId": "6949a4812c3f50411606926e",
+    "organizationId": "695423d59d10cbb54511444f",
+    "userName": "Vishu Agrawal",
+    "userEmail": "agrawal.vishu2020@gmail.com"
   }
 }

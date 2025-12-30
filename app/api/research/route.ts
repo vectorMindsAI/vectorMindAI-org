@@ -3,6 +3,7 @@ import { inngest } from "@/lib/inngest/client";
 import { jobStore } from "@/lib/store";
 import { trackServerEvent } from "@/lib/analytics";
 import { v4 as uuidv4 } from 'uuid';
+import { auth } from "@/auth";
 
 export const POST = async (req: Request) => {
   try {
@@ -16,17 +17,26 @@ export const POST = async (req: Request) => {
       );
     }
 
+    // Get user session for organization context
+    const session = await auth();
+    const userId = session?.user?.id;
+    const organizationId = (session?.user as any)?.organizationId;
+    const userName = session?.user?.name;
+    const userEmail = session?.user?.email;
+
     const jobId = uuidv4();
     await jobStore.create(jobId);
 
-    // Track analytics event
+    // Track analytics event with organization context
     await trackServerEvent('research_initiated', {
       query: city,
       model: model || "groq/compound",
       criteriaCount: criteria ? (Array.isArray(criteria) ? criteria.length : 1) : 0,
+      userId,
+      organizationId,
     }, process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
-    // Trigger the Inngest workflow
+    // Trigger the Inngest workflow with organization context
     await inngest.send({
       name: "research/start",
       data: {
@@ -39,6 +49,10 @@ export const POST = async (req: Request) => {
         },
         model: model || "groq/compound",
         fallbackModel: fallbackModel || "llama-3.3-70b-versatile",
+        userId,
+        organizationId,
+        userName,
+        userEmail,
       },
     });
 

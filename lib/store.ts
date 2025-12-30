@@ -11,6 +11,10 @@ export interface Job {
     result: any | null;
     candidateLinks?: { url: string; title: string; snippet: string }[];
     createdAt: number;
+    userId?: string;
+    organizationId?: string;
+    userName?: string;
+    userEmail?: string;
 }
 
 // Ensure DB file exists

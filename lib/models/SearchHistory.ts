@@ -3,6 +3,9 @@ import mongoose, { Schema, models } from "mongoose"
 export interface ISearchHistory {
   _id: string
   userId: string
+  organizationId?: string
+  userName?: string
+  userEmail?: string
   query: string
   criteria: Array<{
     id: string
@@ -23,6 +26,19 @@ const searchHistorySchema = new Schema<ISearchHistory>(
       type: String,
       required: [true, "User ID is required"],
       index: true,
+    },
+    organizationId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    userName: {
+      type: String,
+      required: false,
+    },
+    userEmail: {
+      type: String,
+      required: false,
     },
     query: {
       type: String,
@@ -73,6 +89,8 @@ const searchHistorySchema = new Schema<ISearchHistory>(
 // Index for efficient queries
 searchHistorySchema.index({ userId: 1, timestamp: -1 })
 searchHistorySchema.index({ userId: 1, query: 1 })
+searchHistorySchema.index({ organizationId: 1, timestamp: -1 })
+searchHistorySchema.index({ organizationId: 1, userId: 1 })
 
 const SearchHistory = models.SearchHistory || mongoose.model<ISearchHistory>("SearchHistory", searchHistorySchema)
 

@@ -73,6 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: user.email,
               image: user.image,
               provider: "google",
+              role: "individual", // Default role for new users
             })
           }
           
@@ -85,6 +86,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true
     },
+    async redirect({ url, baseUrl }) {
+      // If URL is relative, use it
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // If URL is from same site, use it
+      if (url.startsWith(baseUrl)) return url
+      // Otherwise go to dashboard (onboarding page will handle redirect if needed)
+      return baseUrl + "/dashboard"
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
@@ -95,16 +104,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const dbUser = await User.findOne({ email: token.email })
           if (dbUser) {
             token.id = dbUser._id.toString()
+            token.role = dbUser.role
+            token.organizationId = dbUser.organizationId
           }
         } catch (error) {
           console.error("Error fetching user for token:", error)
         }
       }
+      
+      // Always refresh role and organization from DB
+      if (token.id && !user) {
+        try {
+          await dbConnect()
+          const dbUser = await User.findById(token.id)
+          if (dbUser) {
+            token.role = dbUser.role
+            token.organizationId = dbUser.organizationId
+          }
+        } catch (error) {
+          console.error("Error refreshing token data:", error)
+        }
+      }
+      
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
+        session.user.role = (token.role as any) || "individual"
+        session.user.organizationId = token.organizationId as string | undefined
       }
       return session
     },

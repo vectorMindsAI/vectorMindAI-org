@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import dbConnect from "@/lib/mongodb"
 import SearchHistory from "@/lib/models/SearchHistory"
+import User from "@/lib/models/User"
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,9 +29,15 @@ export async function POST(req: NextRequest) {
     }
 
     await dbConnect()
+    
+    // Get user details for organization context
+    const user = await User.findById(session.user.id)
 
     const history = await SearchHistory.create({
       userId: session.user.id,
+      organizationId: (session.user as any).organizationId || user?.organizationId,
+      userName: session.user.name,
+      userEmail: session.user.email,
       query,
       criteria: criteria || [],
       results,
@@ -62,7 +69,21 @@ export async function GET(req: NextRequest) {
 
     await dbConnect()
 
-    const query: any = { userId: session.user.id }
+    // Check if user is org-admin
+    const user = await User.findById(session.user.id)
+    const isOrgAdmin = user?.role === "org-admin"
+    const organizationId = (session.user as any).organizationId || user?.organizationId
+
+    // Build query based on role
+    let query: any = {}
+    
+    if (isOrgAdmin && organizationId) {
+      // Org-admin sees all organization history
+      query.organizationId = organizationId
+    } else {
+      // Regular users see only their own history
+      query.userId = session.user.id
+    }
 
     if (search) {
       query.query = { $regex: search, $options: "i" }
@@ -88,6 +109,7 @@ export async function GET(req: NextRequest) {
         total,
         pages: Math.ceil(total / limit),
       },
+      isOrgAdmin,
     })
   } catch (error) {
     console.error("Error fetching search history:", error)

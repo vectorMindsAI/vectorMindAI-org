@@ -18,6 +18,8 @@ interface HistoryItem {
   status: "success" | "error"
   sizeKB: number
   timestamp: string
+  userName?: string
+  userEmail?: string
 }
 
 interface HistoryDetailProps {
@@ -209,6 +211,7 @@ export function SearchHistoryPanel() {
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [isOrgAdmin, setIsOrgAdmin] = useState(false)
 
   const fetchHistory = async () => {
     try {
@@ -225,6 +228,7 @@ export function SearchHistoryPanel() {
       const data = await res.json()
       setHistory(data.history)
       setTotalPages(data.pagination.pages)
+      setIsOrgAdmin(data.isOrgAdmin || false)
     } catch (error) {
       toast.error("Failed to load search history")
     } finally {
@@ -334,7 +338,14 @@ export function SearchHistoryPanel() {
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">{item.query}</h4>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-medium truncate">{item.query}</h4>
+                                {isOrgAdmin && item.userName && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {item.userName}
+                                  </Badge>
+                                )}
+                              </div>
                               <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
@@ -344,6 +355,11 @@ export function SearchHistoryPanel() {
                                   <Database className="h-3 w-3" />
                                   {item.sizeKB.toFixed(2)} KB
                                 </span>
+                                {isOrgAdmin && item.userEmail && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {item.userEmail}
+                                  </span>
+                                )}
                               </div>
                               {item.criteria.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">

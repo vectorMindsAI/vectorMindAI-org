@@ -52,8 +52,17 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin")
+      return
     }
-  }, [status, router])
+
+    // Redirect to onboarding if user has no organization
+    if (status === "authenticated" && session?.user) {
+      const organizationId = (session.user as any)?.organizationId
+      if (!organizationId) {
+        router.push("/onboarding")
+      }
+    }
+  }, [status, session, router])
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark")
@@ -123,8 +132,26 @@ export default function Dashboard() {
                 <div className="flex-1 overflow-hidden">
                   <p className="text-sm font-medium text-foreground truncate">{session.user.name || "User"}</p>
                   <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+                  {(session.user as any).role && (session.user as any).role !== "individual" && (
+                    <p className="text-xs text-primary font-medium mt-0.5">
+                      {(session.user as any).role === "org-admin" ? "Organization Admin" : "Team Member"}
+                    </p>
+                  )}
                 </div>
               </div>
+              {(session.user as any).role === "org-admin" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    router.push("/dashboard/organization")
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  Manage Organization
+                </Button>
+              )}
               <Separator />
             </>
           )}

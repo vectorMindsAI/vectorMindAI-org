@@ -1,5 +1,6 @@
 
 import { createPlannerAgent } from "../../../lib/agents/planner";
+import { auth } from "@/auth";
 
 export async function POST(req: Request) {
     // Trigger Rebuild
@@ -10,11 +11,23 @@ export async function POST(req: Request) {
             return new Response("User Input is required", { status: 400 });
         }
 
+        // Get user session for organization context
+        const session = await auth();
+        const userId = session?.user?.id;
+        const organizationId = (session?.user as any)?.organizationId;
+
         const planner = createPlannerAgent({ apiKey, model });
         const plan = await planner.generatePlan(userInput);
 
-        return new Response(JSON.stringify({ success: true, plan }), {
-            status: 200,
+        // Include organization context in response metadata
+        return new Response(JSON.stringify({ 
+            success: true, 
+            plan,
+            metadata: {
+                userId,
+                organizationId,
+            }
+        }), {
             headers: { "Content-Type": "application/json" }
         });
     } catch (error: any) {

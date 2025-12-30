@@ -131,11 +131,17 @@ export const extendedResearchFlow = inngest.createFunction(
         }
 
         await step.run("finalize-extended-job", async () => {
+            const { userId, organizationId, userName, userEmail } = event.data;
+            
             await jobStore.update(jobId, {
                 status: "completed",
                 progress: 100,
                 result: aggregatedResults,
-                logs: []
+                logs: [],
+                userId,
+                organizationId,
+                userName,
+                userEmail,
             });
             await jobStore.addLog(jobId, { type: "SUCCESS", message: "Deep dive completed" });
         });

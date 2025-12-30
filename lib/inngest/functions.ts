@@ -85,11 +85,17 @@ export const researchFlow = inngest.createFunction(
 
         // Finalize
         await step.run("finalize-job", async () => {
+            const { userId, organizationId, userName, userEmail } = event.data;
+            
             await jobStore.update(jobId, {
                 status: "completed",
                 progress: 100,
                 result: aggregatedResults,
-                logs: [] // Optional: clear logs or keep them. Keeping them is better for debugging, appending final success.
+                logs: [], // Optional: clear logs or keep them. Keeping them is better for debugging, appending final success.
+                userId,
+                organizationId,
+                userName,
+                userEmail,
             });
             await jobStore.addLog(jobId, { type: "SUCCESS", message: "Research successfully completed" });
         });
