@@ -158,34 +158,34 @@ export default function OnboardingPage() {
 
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
             Welcome to VectorMind AI
           </h1>
-          <p className="text-gray-600">Set up your workspace to get started</p>
+          <p className="text-muted-foreground">Set up your workspace to get started</p>
         </div>
 
         {!selectedOption ? (
           <div className="grid md:grid-cols-2 gap-6">
             <Card
-              className="cursor-pointer hover:shadow-xl transition-all border-2 hover:border-purple-500"
+              className="cursor-pointer hover:shadow-xl transition-all border-2 hover:border-purple-500 bg-card"
               onClick={() => setSelectedOption("create")}
             >
               <CardHeader>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <Building2 className="h-6 w-6 text-purple-600" />
+                <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-4">
+                  <Building2 className="h-6 w-6 text-purple-500" />
                 </div>
                 <CardTitle>Create Organization</CardTitle>
                 <CardDescription>
@@ -193,7 +193,7 @@ export default function OnboardingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Invite team members</li>
                   <li>• View all member activities</li>
                   <li>• Access organization analytics</li>
@@ -203,12 +203,12 @@ export default function OnboardingPage() {
             </Card>
 
             <Card
-              className="cursor-pointer hover:shadow-xl transition-all border-2 hover:border-blue-500"
+              className="cursor-pointer hover:shadow-xl transition-all border-2 hover:border-blue-500 bg-card"
               onClick={() => setSelectedOption("join")}
             >
               <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-blue-500" />
                 </div>
                 <CardTitle>Join Organization</CardTitle>
                 <CardDescription>
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Search for organizations</li>
                   <li>• Send join request</li>
                   <li>• Wait for admin approval</li>
@@ -291,11 +291,11 @@ export default function OnboardingPage() {
                   {searchResults.map((org) => (
                     <div
                       key={org._id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent"
                     >
                       <div>
                         <p className="font-medium">{org.name}</p>
-                        <p className="text-sm text-gray-500">{org.memberCount} members</p>
+                        <p className="text-sm text-muted-foreground">{org.memberCount} members</p>
                       </div>
                       <Button
                         onClick={() => handleRequestToJoin(org._id, org.name)}
@@ -322,7 +322,7 @@ export default function OnboardingPage() {
           <Button variant="ghost" onClick={handleSkip} disabled={loading}>
             {loading ? "Creating workspace..." : "Skip for now"}
           </Button>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             A default workspace will be created. You can join other organizations later.
           </p>
         </div>
