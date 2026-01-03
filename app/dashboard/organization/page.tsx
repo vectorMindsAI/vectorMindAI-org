@@ -7,6 +7,9 @@ import { MemberManagement } from "@/components/member-management"
 import JoinRequestsPanel from "@/components/join-requests-panel"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function OrganizationDashboard() {
   const { data: session, status } = useSession()
@@ -58,9 +61,17 @@ export default function OrganizationDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Organization Management</h1>
-        <p className="text-gray-600">Manage your team and monitor activity</p>
+      <div className="space-y-4">
+        <Link href="/dashboard">
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Organization Management</h1>
+          <p className="text-gray-600">Manage your team and monitor activity</p>
+        </div>
       </div>
 
       {orgStats && (
