@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import arcjet, { slidingWindow } from "@arcjet/next"
+import arcjet, { slidingWindow, tokenBucket } from "@arcjet/next"
 
+// General rate limit: 50 req / 60s
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [
@@ -13,11 +14,33 @@ const aj = arcjet({
   ],
 })
 
+// Research-specific rate limit: 5 req / 60s
+const ajResearch = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 5,
+      interval: "60s",
+      capacity: 5,
+    }),
+  ],
+})
+
 export async function middleware(request: NextRequest) {
-  const decision = await aj.protect(request)
+  let decision;
+
+  if (request.nextUrl.pathname.startsWith("/api/research")) {
+    decision = await ajResearch.protect(request, { requested: 1 })
+  } else {
+    decision = await aj.protect(request)
+  }
 
   if (decision.isDenied()) {
-    return NextResponse.json({ error: "Too Many Requests", reason: decision.reason }, { status: 429 })
+    return NextResponse.json(
+      { error: "Too Many Requests", reason: decision.reason },
+      { status: 429 }
+    )
   }
 
   return NextResponse.next()

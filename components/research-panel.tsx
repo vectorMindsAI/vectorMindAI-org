@@ -210,6 +210,10 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
         }),
       })
 
+      if (response.status === 429) {
+          throw new Error("Rate limit exceeded. Please try again later (Limit: 5 searches/min).")
+      }
+
       const data = await response.json()
       if (data.jobId) {
         setJobId(data.jobId)
