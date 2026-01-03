@@ -10,6 +10,10 @@ export interface IUser {
   role: "individual" | "org-admin" | "member"
   organizationId?: string
   joinedAt?: Date
+  apiKeys?: Array<{
+    provider: string
+    apiKey: string
+  }>
   createdAt: Date
   updatedAt: Date
 }
@@ -56,6 +60,18 @@ const userSchema = new Schema<IUser>(
       type: Date,
       required: false,
     },
+    apiKeys: [
+      {
+        provider: {
+          type: String,
+          required: true,
+        },
+        apiKey: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

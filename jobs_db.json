@@ -2788,5 +2788,28 @@
     "organizationId": "695423d59d10cbb54511444f",
     "userName": "Vishu Agrawal",
     "userEmail": "agrawal.vishu2020@gmail.com"
+  },
+  "476ea15b-f9e7-4d0d-a69b-36347d453b9f": {
+    "id": "476ea15b-f9e7-4d0d-a69b-36347d453b9f",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767127376374
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "details": "401 {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}",
+        "error": "Failed to process Average Temperature"
+      }
+    },
+    "createdAt": 1767127374890,
+    "userId": "69542e5439feeb535b9ae0b1",
+    "organizationId": "695423d59d10cbb54511444f",
+    "userName": "b",
+    "userEmail": "b@a.com"
   }
 }

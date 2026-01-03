@@ -35,6 +35,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "@/lib/toast"
 import { useSession, signOut } from "next-auth/react"
+import { getApiKeyForModel, getProviderForModel } from "@/lib/model-provider-map"
 
 export default function Dashboard() {
   const router = useRouter()
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const [selectedModel, setSelectedModel] = useState("groq/compound")
   const [selectedFallbackModel, setSelectedFallbackModel] = useState("llama-3.3-70b-versatile")
   const [organizationName, setOrganizationName] = useState("")
+  const [savedApiKeys, setSavedApiKeys] = useState<Array<{ provider: string; apiKey: string }>>([])
   const [criteria, setCriteria] = useState<any[]>([
     { id: "1", name: "Average Temperature", description: "Annual average temperature in Celsius", outputSchema: [] },
   ])
@@ -71,6 +73,26 @@ export default function Dashboard() {
             }
           })
           .catch((err) => console.error("Error fetching organization:", err))
+        
+        // Fetch saved API keys
+        fetch(`/api/user/api-keys`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Fetched API keys data:", data)
+            if (data.apiKeys && Array.isArray(data.apiKeys)) {
+              console.log("Setting savedApiKeys:", data.apiKeys)
+              setSavedApiKeys(data.apiKeys)
+              
+              // Auto-fill API keys based on selected models
+              const primaryKey = getApiKeyForModel(selectedModel, data.apiKeys)
+              const tavilyKey = data.apiKeys.find((k: any) => k.provider === "tavily")
+              
+              console.log("Auto-filling keys - Model:", selectedModel, "Primary Key:", primaryKey, "Tavily Key:", tavilyKey?.apiKey)
+              setApiKey(primaryKey)
+              setTavilyKey(tavilyKey?.apiKey || "")
+            }
+          })
+          .catch((err) => console.error("Error fetching API keys:", err))
       }
     }
   }, [status, session, router])
@@ -78,6 +100,16 @@ export default function Dashboard() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark")
   }, [theme])
+
+  // Auto-fill API key when model changes
+  useEffect(() => {
+    console.log("Model changed effect triggered - Model:", selectedModel, "Saved Keys:", savedApiKeys)
+    if (savedApiKeys.length > 0) {
+      const newApiKey = getApiKeyForModel(selectedModel, savedApiKeys)
+      console.log("Auto-filling key for model:", selectedModel, "Provider:", getProviderForModel(selectedModel), "Key:", newApiKey)
+      setApiKey(newApiKey)
+    }
+  }, [selectedModel, savedApiKeys])
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light")
@@ -169,16 +201,21 @@ export default function Dashboard() {
 
           <div className="space-y-2">
             <Label htmlFor="api-key-primary" className="text-xs font-medium text-foreground">
-              Primary Model API Key
+              Groq API Key
             </Label>
             <Input
               id="api-key-primary"
               type="password"
-              placeholder="Enter Groq API key"
+              placeholder="Auto-filled from saved keys"
               className="h-9 bg-background text-sm"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
+            <Link href="/dashboard/api-keys">
+              <Button variant="link" size="sm" className="h-auto p-0 text-xs">
+                Manage API Keys →
+              </Button>
+            </Link>
           </div>
 
           <div className="space-y-2">
@@ -237,12 +274,14 @@ export default function Dashboard() {
             <Input
               id="tavily-key"
               type="password"
-              placeholder="Enter Tavily API key"
+              placeholder="Auto-filled from saved keys"
               className="h-9 bg-background text-sm"
               value={tavilyKey}
               onChange={(e) => setTavilyKey(e.target.value)}
             />
           </div>
+
+          <Separator className="my-1" />
 
           {/* Theme Toggle */}
           <div className="space-y-2">
