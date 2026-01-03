@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { jobStore } from "@/lib/store";
 
+export const dynamic = "force-dynamic";
+
 export const GET = async (req: Request) => {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
