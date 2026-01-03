@@ -18,12 +18,11 @@ interface ApiKey {
 
 const commonProviders = [
   { name: "groq", label: "Groq" },
-  { name: "openai", label: "OpenAI" },
-  { name: "anthropic", label: "Anthropic" },
   { name: "google", label: "Google AI" },
   { name: "tavily", label: "Tavily Search" },
-  { name: "perplexity", label: "Perplexity" },
-  { name: "cohere", label: "Cohere" },
+  { name: "mixedbread", label: "Mixedbread" },
+  { name: "pinecone_api", label: "Pinecone API" },
+  { name: "pinecone_index_name", label: "Pinecone Index Name" },
 ]
 
 export default function ApiKeysPage() {

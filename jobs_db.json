@@ -2811,5 +2811,49 @@
     "organizationId": "695423d59d10cbb54511444f",
     "userName": "b",
     "userEmail": "b@a.com"
+  },
+  "3f273384-642d-4511-9abf-cfb27ee42220": {
+    "id": "3f273384-642d-4511-9abf-cfb27ee42220",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767460986699
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "average_annual_temperature": 25
+      }
+    },
+    "createdAt": 1767460975705,
+    "userId": "69594f2e6a2c92291a7b1477",
+    "organizationId": "69594f3c6a2c92291a7b1480",
+    "userName": "Priyansh Padhi",
+    "userEmail": "priyansh56701@gmail.com"
+  },
+  "c6f86d5e-23aa-4480-94fa-a70e93178536": {
+    "id": "c6f86d5e-23aa-4480-94fa-a70e93178536",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767461121554
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "annual_average_temperature": 25.1
+      }
+    },
+    "createdAt": 1767461101815,
+    "userId": "69594f2e6a2c92291a7b1477",
+    "organizationId": "69594f3c6a2c92291a7b1480",
+    "userName": "Priyansh Padhi",
+    "userEmail": "priyansh56701@gmail.com"
   }
 }
