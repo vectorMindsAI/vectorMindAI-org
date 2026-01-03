@@ -84,6 +84,12 @@ Transform basic city names into comprehensive intelligence reports by orchestrat
 - Response time metrics
 - Export logs for auditing
 
+### Rate Limiting & Security
+- **Arcjet Integration**: Enterprise-grade rate limiting and bot protection.
+- **General Protection**: Sliding window limit of 50 requests/min for general API routes.
+- **Research Protection**: Strict token bucket limit of 5 requests/min for expensive research operations.
+- **Bot Detection**: Automated blocking of malicious bots and scrapers.
+
 ### Documentation Hub
 - Interactive API documentation
 - Usage examples and code snippets
@@ -147,6 +153,7 @@ pnpm install
    NEXTAUTH_URL="http://localhost:3000"
    AUTH_GOOGLE_ID="your_google_client_id"
    AUTH_GOOGLE_SECRET="your_google_client_secret"
+   ARCJET_KEY="your_arcjet_key" # Get from https://app.arcjet.com
    ```
 
 4. **Run Development Server**
@@ -306,7 +313,7 @@ Test MongoDB connection.
 - [ ] **Webhooks** - Real-time notifications for completed research
 - [ ] **Team Collaboration** - Share criteria templates and reports
 - [ ] **Advanced Analytics** - ML-powered insights on research data
-- [ ] **API Rate Limiting** - Built-in rate limit management
+- [x] **API Rate Limiting** - Built-in rate limit management (Powered by Arcjet)
 - [ ] **Export Formats** - CSV, Excel, PDF report generation
 - [ ] **Custom Integrations** - Zapier, Make, n8n connectors
 
