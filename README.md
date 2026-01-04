@@ -347,7 +347,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-Built with [v0.app](https://v0.app) - AI-powered UI generation
 Powered by [Vercel](https://vercel.com) - Deployment platform
 UI components by [shadcn/ui](https://ui.shadcn.com)
 
