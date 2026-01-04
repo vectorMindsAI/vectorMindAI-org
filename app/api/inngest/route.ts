@@ -13,4 +13,5 @@ export const { GET, POST, PUT } = serve({
         processEmbeddings,
         agentPlanExecutor
     ],
+    signingKey: process.env.INNGEST_SIGNING_KEY,
 });
