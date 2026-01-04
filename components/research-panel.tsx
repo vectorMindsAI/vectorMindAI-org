@@ -37,6 +37,7 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
   const [selectedDeepLinks, setSelectedDeepLinks] = useState<string[]>([])
   
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
+  const historySavedRef = useRef<boolean>(false)
 
   useEffect(() => {
     return () => {
@@ -46,6 +47,8 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
 
   // Auto-save to history
   const saveToHistory = async (results: any) => {
+    if (historySavedRef.current) return // Prevent duplicate saves
+    historySavedRef.current = true
     try {
       await fetch("/api/history", {
         method: "POST",
@@ -176,6 +179,7 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
     setProgress(0)
     setLogs([])
     setResearchReport(null)
+    historySavedRef.current = false // Reset for new search
     toast.loading("Starting research...", { id: "research" })
 
     // Track search initiation

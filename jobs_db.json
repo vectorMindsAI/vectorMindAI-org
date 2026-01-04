@@ -2943,5 +2943,59 @@
     "organizationId": "69594f3c6a2c92291a7b1480",
     "userName": "Priyansh Padhi",
     "userEmail": "priyansh56701@gmail.com"
+  },
+  "47430d88-e960-4ab9-8673-cae10bb71428": {
+    "id": "47430d88-e960-4ab9-8673-cae10bb71428",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767553826620
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "annual_average_temperatures": [
+          {
+            "source": "Tutiempo",
+            "temperature_celsius": 26.7
+          },
+          {
+            "source": "Climatestotravel",
+            "temperature_celsius": 27.61
+          }
+        ]
+      }
+    },
+    "createdAt": 1767553809840,
+    "userId": "695ab708cabe80f5d53ff9e5",
+    "organizationId": "695ab71ecabe80f5d53ff9ef",
+    "userName": "Kumar Vanshaj",
+    "userEmail": "kumar.vanshaj2024@gmail.com"
+  },
+  "39f221a8-d7a6-4ad7-af4a-f189a0064ebc": {
+    "id": "39f221a8-d7a6-4ad7-af4a-f189a0064ebc",
+    "status": "completed",
+    "progress": 100,
+    "logs": [
+      {
+        "type": "SUCCESS",
+        "message": "Research successfully completed",
+        "timestamp": 1767554156727
+      }
+    ],
+    "result": {
+      "Average Temperature": {
+        "details": "UNKNOWN: unknown error, open 'C:\\Users\\kumar\\Desktop\\VS Code\\Web Development\\project\\ai-research\\vectorMindAI-org\\jobs_db.json'",
+        "error": "Failed to process Average Temperature"
+      }
+    },
+    "createdAt": 1767554145412,
+    "userId": "695ab708cabe80f5d53ff9e5",
+    "organizationId": "695ab71ecabe80f5d53ff9ef",
+    "userName": "Kumar Vanshaj",
+    "userEmail": "kumar.vanshaj2024@gmail.com"
   }
 }
