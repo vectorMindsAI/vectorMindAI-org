@@ -10,7 +10,7 @@ AI City Research Agent is a powerful, privacy-first research platform that enabl
 
 ### What It Does
 
-Transform basic city names into comprehensive intelligence reports by orchestrating multiple AI models and data sources to gather, analyze, and enrich location data with custom criteria.
+Transform basic research queries into comprehensive intelligence reports by orchestrating multiple AI models and data sources to gather, analyze, and enrich location data with custom criteria.
 
 ---
 
