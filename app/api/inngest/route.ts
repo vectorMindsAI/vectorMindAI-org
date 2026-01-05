@@ -7,7 +7,7 @@ import { agentPlanExecutor } from "@/lib/inngest/agent-runner";
 
 export const runtime = "nodejs"; // IMPORTANT
 
-export default serve({
+export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     researchFlow,
