@@ -27,6 +27,18 @@ const ajResearch = arcjet({
   ],
 })
 
+// Status polling rate limit: 120 req / 60s (more lenient for polling)
+const ajStatus = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "60s",
+      max: 120,
+    }),
+  ],
+})
+
 export async function middleware(request: NextRequest) {
   // Skip middleware for Inngest webhook endpoint
   if (request.nextUrl.pathname.startsWith("/api/inngest")) {
@@ -35,7 +47,10 @@ export async function middleware(request: NextRequest) {
 
   let decision;
 
-  if (request.nextUrl.pathname.startsWith("/api/research")) {
+  // More lenient rate limit for status polling endpoints
+  if (request.nextUrl.pathname.includes("/status")) {
+    decision = await ajStatus.protect(request)
+  } else if (request.nextUrl.pathname.startsWith("/api/research")) {
     decision = await ajResearch.protect(request, { requested: 1 })
   } else {
     decision = await aj.protect(request)
