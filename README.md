@@ -1,4 +1,4 @@
-# AI City Research Agent
+# Vector Mind AI
 
 **Multi-Step Enrichment Engine for City Data Intelligence**
 
