@@ -29,7 +29,7 @@ export default function HomePage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-base lg:text-lg font-semibold text-foreground">AI Research Agent</span>
+            <span className="text-base lg:text-lg font-semibold text-foreground">Vector Minds AI</span>
           </div>
 
           <div className="flex items-center gap-2 lg:gap-4">
@@ -61,7 +61,7 @@ export default function HomePage() {
           </div>
 
           <h1 className="mb-4 lg:mb-6 text-balance text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight tracking-tight text-foreground">
-            Intelligent City Research
+            Intelligent Research
             <span className="text-primary"> Powered by AI</span>
           </h1>
 
