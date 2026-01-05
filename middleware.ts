@@ -28,6 +28,11 @@ const ajResearch = arcjet({
 })
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for Inngest webhook endpoint
+  if (request.nextUrl.pathname.startsWith("/api/inngest")) {
+    return NextResponse.next()
+  }
+
   let decision;
 
   if (request.nextUrl.pathname.startsWith("/api/research")) {
