@@ -48,9 +48,7 @@ export default function Dashboard() {
   const [selectedFallbackModel, setSelectedFallbackModel] = useState("llama-3.3-70b-versatile")
   const [organizationName, setOrganizationName] = useState("")
   const [savedApiKeys, setSavedApiKeys] = useState<Array<{ provider: string; apiKey: string }>>([])
-  const [criteria, setCriteria] = useState<any[]>([
-    { id: "1", name: "Average Temperature", description: "Annual average temperature in Celsius", outputSchema: [] },
-  ])
+  const [criteria, setCriteria] = useState<any[]>([])
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -414,7 +412,12 @@ export default function Dashboard() {
               </TabsContent>
 
               <TabsContent value="criteria" className="mt-0">
-                <CriteriaBuilder criteria={criteria} setCriteria={setCriteria} />
+                <CriteriaBuilder 
+                  criteria={criteria} 
+                  setCriteria={setCriteria}
+                  userId={(session?.user as any)?._id}
+                  organizationId={(session?.user as any)?.organizationId}
+                />
               </TabsContent>
 
               <TabsContent value="history" className="mt-0">

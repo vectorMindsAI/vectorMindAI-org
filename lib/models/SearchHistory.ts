@@ -11,6 +11,10 @@ export interface ISearchHistory {
     id: string
     name: string
     description: string
+    outputSchema?: Array<{
+      key: string
+      description: string
+    }>
   }>
   results: any
   model: string
@@ -51,6 +55,12 @@ const searchHistorySchema = new Schema<ISearchHistory>(
           id: String,
           name: String,
           description: String,
+          outputSchema: [
+            {
+              key: String,
+              description: String,
+            },
+          ],
         },
       ],
       default: [],

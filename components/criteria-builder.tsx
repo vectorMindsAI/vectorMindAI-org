@@ -1,11 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Trash2, Wand2, X } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Plus, Trash2, Wand2, X, Save, Upload, Lock, Globe, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "@/lib/toast"
 import { analytics } from "@/lib/analytics"
 
@@ -21,12 +27,204 @@ interface Criterion {
   outputSchema: OutputSchemaItem[]
 }
 
+interface Template {
+  _id: string
+  name: string
+  description: string
+  criteria: Criterion[]
+  visibility: "private" | "public"
+  createdBy: string
+  userId: string
+  organizationId?: string
+  createdAt: string
+  updatedAt: string
+  isOwner: boolean
+}
+
 interface CriteriaBuilderProps {
   criteria: Criterion[]
   setCriteria: (criteria: Criterion[]) => void
+  userId?: string
+  organizationId?: string
 }
 
-export function CriteriaBuilder({ criteria, setCriteria }: CriteriaBuilderProps) {
+export function CriteriaBuilder({ criteria, setCriteria, userId, organizationId }: CriteriaBuilderProps) {
+  // Template state
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
+  
+  // Save dialog state
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [templateName, setTemplateName] = useState("")
+  const [templateDescription, setTemplateDescription] = useState("")
+  const [visibility, setVisibility] = useState<"private" | "public">("private")
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // Delete confirmation dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null)
+  
+  // Fetch templates on mount
+  useEffect(() => {
+    fetchTemplates()
+  }, [])
+
+  // Debug: Log when criteria changes
+  useEffect(() => {
+    console.log('🔄 CriteriaBuilder: criteria prop changed:', criteria)
+    console.log('🔄 CriteriaBuilder: criteria length:', criteria.length)
+  }, [criteria])
+
+  // Fetch templates from API
+  const fetchTemplates = async () => {
+    setIsLoadingTemplates(true)
+    try {
+      const response = await fetch("/api/criteria-templates")
+      if (response.ok) {
+        const data = await response.json()
+        console.log('📥 Fetched templates from API:', data.templates)
+        setTemplates(data.templates || [])
+      } else {
+        console.error("Failed to fetch templates")
+      }
+    } catch (error) {
+      console.error("Error fetching templates:", error)
+    } finally {
+      setIsLoadingTemplates(false)
+    }
+  }
+
+  // Save current criteria as template
+  const handleSaveTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error("Please enter a template name")
+      return
+    }
+
+    if (criteria.length === 0) {
+      toast.error("Please add at least one criterion before saving")
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      console.log('💾 Saving template with criteria:', criteria)
+      console.log('💾 Criteria JSON:', JSON.stringify(criteria, null, 2))
+      
+      const response = await fetch("/api/criteria-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: templateName,
+          description: templateDescription,
+          criteria,
+          visibility,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Template saved successfully:', data)
+        toast.success(`Template "${templateName}" saved successfully`)
+        
+        // Track template save
+        analytics.track('criteria_template_saved', {
+          templateName,
+          visibility,
+          criteriaCount: criteria.length,
+        })
+        
+        // Refresh templates and close dialog
+        await fetchTemplates()
+        setShowSaveDialog(false)
+        setTemplateName("")
+        setTemplateDescription("")
+        setVisibility("private")
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to save template")
+      }
+    } catch (error) {
+      console.error("Error saving template:", error)
+      toast.error("Failed to save template")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Load template into criteria
+  const handleLoadTemplate = (templateId: string) => {
+    console.log('🔄 handleLoadTemplate called with templateId:', templateId)
+    console.log('📋 Available templates:', templates)
+    
+    const template = templates.find(t => t._id === templateId)
+    console.log('🎯 Found template:', template)
+    
+    if (!template) {
+      toast.error("Template not found")
+      console.error('❌ Template not found for ID:', templateId)
+      return
+    }
+
+    console.log('🔄 Loading template:', template.name, 'with', template.criteria.length, 'criteria')
+    console.log('📋 Criteria details:', JSON.stringify(template.criteria, null, 2))
+    console.log('🔧 Current criteria before setCriteria:', criteria)
+    
+    setCriteria(template.criteria)
+    setSelectedTemplateId(templateId)
+    
+    console.log('✅ setCriteria called with:', template.criteria)
+    
+    toast.success(`✓ Loaded "${template.name}" with ${template.criteria.length} criteria. Ready for research!`)
+    
+    // Track template load
+    analytics.track('criteria_template_loaded', {
+      templateName: template.name,
+      visibility: template.visibility,
+      criteriaCount: template.criteria.length,
+    })
+  }
+
+  // Delete template
+  const handleDeleteTemplate = async () => {
+    if (!templateToDelete) return
+
+    try {
+      const response = await fetch(`/api/criteria-templates/${templateToDelete}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Template deleted successfully")
+        
+        // Track template deletion
+        const deletedTemplate = templates.find(t => t._id === templateToDelete)
+        if (deletedTemplate) {
+          analytics.track('criteria_template_deleted', {
+            templateName: deletedTemplate.name,
+          })
+        }
+        
+        // Clear selection if deleted template was selected
+        if (selectedTemplateId === templateToDelete) {
+          setSelectedTemplateId(null)
+        }
+        
+        // Refresh templates
+        await fetchTemplates()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || "Failed to delete template")
+      }
+    } catch (error) {
+      console.error("Error deleting template:", error)
+      toast.error("Failed to delete template")
+    } finally {
+      setShowDeleteDialog(false)
+      setTemplateToDelete(null)
+    }
+  }
 
   const addCriterion = () => {
     const newCriterion: Criterion = {
@@ -102,19 +300,159 @@ export function CriteriaBuilder({ criteria, setCriteria }: CriteriaBuilderProps)
       toast.error("Please add at least one criterion")
       return
     }
-    toast.success("Query generated successfully")
+    toast.success("Criteria validated and ready for research!")
   }
 
   const addToPipeline = () => {
     if (criteria.some((c) => !c.name || !c.description)) {
-      toast.error("Please fill in all fields")
+      toast.error("Please fill in all fields before using in research")
       return
     }
-    toast.success(`Added ${criteria.length} criteria to pipeline`)
+    toast.success(`${criteria.length} criteria ready! Switch to Research tab to start.`)
   }
 
   return (
     <div className="space-y-4 lg:space-y-6">
+      {/* Active Criteria Status */}
+      {criteria.length > 0 && (
+        <Card className="border-primary bg-primary/5">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">Pipeline Active: {criteria.length} criteria field{criteria.length !== 1 ? 's' : ''} loaded</span>
+              </div>
+              <Badge variant="default" className="bg-green-600">Ready for Research</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Template Management Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base lg:text-lg">Criteria Templates</CardTitle>
+          <CardDescription className="text-xs lg:text-sm">
+            Save and load your criteria configurations
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Load Template Dropdown */}
+          <div className="space-y-2">
+            <Label className="text-xs lg:text-sm">Load Template</Label>
+            <Select 
+              value={selectedTemplateId || ""}
+              onValueChange={handleLoadTemplate}
+              disabled={isLoadingTemplates}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={isLoadingTemplates ? "Loading templates..." : "Select a template"} />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.length === 0 ? (
+                  <SelectItem value="no-templates" disabled>
+                    No templates saved yet
+                  </SelectItem>
+                ) : (
+                  <>
+                    {/* User's Templates */}
+                    {templates.filter(t => t.isOwner).length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs font-semibold">My Templates</SelectLabel>
+                        {templates.filter(t => t.isOwner).map(template => (
+                          <SelectItem key={template._id} value={template._id}>
+                            <div className="flex items-center gap-2 w-full">
+                              <span className="flex-1">{template.name}</span>
+                              <span className="text-[10px] text-muted-foreground">({template.criteria.length} fields)</span>
+                              {template.visibility === "private" ? (
+                                <Lock className="h-3 w-3 text-muted-foreground" />
+                              ) : (
+                                <Globe className="h-3 w-3 text-blue-500" />
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+                    
+                    {/* Public Organization Templates */}
+                    {templates.filter(t => !t.isOwner).length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs font-semibold">Public Templates</SelectLabel>
+                        {templates.filter(t => !t.isOwner).map(template => (
+                          <SelectItem key={template._id} value={template._id}>
+                            <div className="flex items-center gap-2 w-full">
+                              <span className="flex-1">{template.name}</span>
+                              <span className="text-[10px] text-muted-foreground">({template.criteria.length} fields, by {template.createdBy})</span>
+                              <Globe className="h-3 w-3 text-blue-500" />
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+            
+            {/* Template Actions */}
+            {selectedTemplateId && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                  <div className="flex items-center gap-2 flex-1">
+                    <Badge variant={templates.find(t => t._id === selectedTemplateId)?.visibility === "public" ? "default" : "secondary"}>
+                      {templates.find(t => t._id === selectedTemplateId)?.visibility === "public" ? (
+                        <><Globe className="h-3 w-3 mr-1" /> Public</>
+                      ) : (
+                        <><Lock className="h-3 w-3 mr-1" /> Private</>
+                      )}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground truncate">
+                      {templates.find(t => t._id === selectedTemplateId)?.description || "No description"}
+                    </span>
+                  </div>
+                  {templates.find(t => t._id === selectedTemplateId)?.isOwner && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setTemplateToDelete(selectedTemplateId)
+                        setShowDeleteDialog(true)
+                      }}
+                      className="h-7 text-destructive hover:text-destructive shrink-0"
+                    >
+                      <Trash className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Show loaded criteria details */}
+                <div className="text-xs bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-md p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300 font-medium">
+                    <span className="text-lg">✓</span>
+                    <span>Template loaded: {templates.find(t => t._id === selectedTemplateId)?.criteria.length} criteria fields active</span>
+                  </div>
+                  <div className="text-green-600 dark:text-green-400 text-xs">
+                    These criteria are now active in your research pipeline. Switch to the <strong>Research</strong> tab to use them.
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Save Template Button */}
+          <Button 
+            onClick={() => setShowSaveDialog(true)}
+            variant="default"
+            className="w-full"
+            disabled={criteria.length === 0}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save Current Criteria as Template
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base lg:text-lg">Custom Criteria Builder</CardTitle>
@@ -188,7 +526,7 @@ export function CriteriaBuilder({ criteria, setCriteria }: CriteriaBuilderProps)
                                         className="h-8 text-xs"
                                     />
                                 </div>
-                                <div className="flex-[2] space-y-1">
+                                <div className="flex-2 space-y-1">
                                     <Label className="text-[10px] text-muted-foreground">Description/Value Format</Label>
                                     <Input 
                                         placeholder="e.g. Number in millions" 
@@ -237,12 +575,131 @@ export function CriteriaBuilder({ criteria, setCriteria }: CriteriaBuilderProps)
 
       {/* Info Card */}
       <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-4 lg:pt-6">
+        <CardContent className="pt-4 lg:pt-6 space-y-2">
           <p className="text-xs lg:text-sm leading-relaxed text-foreground">
             <strong>How it works:</strong> Define strictly structured keys to force the AI to return data in a specific JSON-like format for each criterion.
           </p>
+          <p className="text-xs lg:text-sm leading-relaxed text-foreground">
+            <strong>💡 Quick Tip:</strong> After saving or loading a template, switch to the <strong>Research</strong> tab to use these criteria in your AI research pipeline.
+          </p>
         </CardContent>
       </Card>
+
+      {/* Save Template Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Save Criteria Template</DialogTitle>
+            <DialogDescription>
+              Save your current criteria configuration for future use
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Criteria Preview */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Criteria to be Saved ({criteria.length} fields)</Label>
+              <div className="border rounded-md p-3 bg-muted/30 max-h-48 overflow-y-auto space-y-2">
+                {criteria.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No criteria added yet</p>
+                ) : (
+                  criteria.map((criterion, index) => (
+                    <div key={criterion.id} className="text-xs border-l-2 border-primary pl-2 py-1">
+                      <div className="font-medium">{index + 1}. {criterion.name || "(Unnamed)"}</div>
+                      <div className="text-muted-foreground">{criterion.description || "(No description)"}</div>
+                      {criterion.outputSchema && criterion.outputSchema.length > 0 && (
+                        <div className="mt-1 text-[10px] text-primary">
+                          📋 Output Schema: {criterion.outputSchema.map(s => s.key).join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="template-name">Template Name *</Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., City Research Template"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="template-description">Description</Label>
+              <Textarea
+                id="template-description"
+                placeholder="Describe what this template is for..."
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="visibility-toggle">Public Template</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {visibility === "public" 
+                      ? "Visible to all members in your organization" 
+                      : "Only visible to you"}
+                  </p>
+                </div>
+                <Switch
+                  id="visibility-toggle"
+                  checked={visibility === "public"}
+                  onCheckedChange={(checked) => setVisibility(checked ? "public" : "private")}
+                />
+              </div>
+              
+              {visibility === "public" && (
+                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-md">
+                  <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    This template will be visible to all members in your organization and they can use it.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveTemplate} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Template"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this template? This action cannot be undone.
+              {templates.find(t => t._id === templateToDelete)?.visibility === "public" && (
+                <span className="block mt-2 text-orange-600 dark:text-orange-400">
+                  Warning: This is a public template. Other organization members will lose access to it.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTemplate} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

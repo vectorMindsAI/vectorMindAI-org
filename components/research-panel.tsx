@@ -39,6 +39,12 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
   const historySavedRef = useRef<boolean>(false)
 
+  // Log criteria when it changes
+  useEffect(() => {
+    console.log('📊 ResearchPanel received criteria update:', criteria)
+    console.log('📊 Criteria count:', criteria.length)
+  }, [criteria])
+
   useEffect(() => {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current)
@@ -255,6 +261,32 @@ export function ResearchPanel({ apiKey, tavilyKey, model, criteria }: ResearchPa
 
   return (
     <div className="space-y-4 lg:space-y-6">
+      {/* Active Criteria Display */}
+      {criteria && criteria.length > 0 && (
+        <Card className="border-green-500 bg-green-50 dark:bg-green-950/20">
+          <CardContent className="pt-4 pb-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                  Active Criteria Pipeline: {criteria.length} field{criteria.length !== 1 ? 's' : ''} loaded
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {criteria.map((c: any, i: number) => (
+                  <Badge key={i} variant="secondary" className="text-xs">
+                    {c.name || `Field ${i + 1}`}
+                    {c.outputSchema && c.outputSchema.length > 0 && (
+                      <span className="ml-1 text-[10px] text-muted-foreground">({c.outputSchema.length} keys)</span>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {/* City Input Section */}
       <Card>
         <CardHeader>
