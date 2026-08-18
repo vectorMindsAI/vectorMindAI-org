@@ -3,7 +3,7 @@
 **Multi-Step Enrichment Engine for City Data Intelligence**
 
 ---
-
+.
 ## Overview
 
 AI City Research Agent is a powerful, privacy-first research platform that enables multi-step data enrichment for city intelligence gathering. Built on a **Bring Your Own Key (BYOK)** model, it puts you in complete control of your API usage and costs while providing enterprise-grade research capabilities.
